@@ -30,6 +30,7 @@ const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You are not allowed to do that');
 
+//converts the HH:MM:SS format into total number of seconds
 function convertToSeconds(hours, minutes, seconds) {
 	let h = hours * 3600;
 	let m = minutes * 60;
@@ -64,7 +65,7 @@ module.exports = {
 
 				raceActive = true;
 
-				// hours:minutes:seconds
+			// hours:minutes:seconds
 				time = args[1].split(':');
 
 				racer = {
@@ -97,7 +98,7 @@ module.exports = {
 				
 				raceActive = true;
 				
-				// minutes:seconds
+			// minutes:seconds
 				time = args[1].split(':');
 
 				racer = {
@@ -124,9 +125,6 @@ module.exports = {
 
 				console.log(racers);
 				
-				let racerRole = message.member.guild.roles.cache.find(role => role.name === "racer");
-				message.member.roles.add(racerRole);
-				
 			return message.channel.send(submitEmbedMS);
 
 			} else return message.react('❌');
@@ -135,9 +133,9 @@ module.exports = {
 		if (args[0] === 'results' || args[0] === 'r') {
 			if (raceActive === true) {
 
-				//yoooooo i got no clue how to even start this lmao
-				racers.sort(function(a, b){return a-b});
-				console.log(racers);
+				racers.sort(a, b) => a - b)
+				
+
 			} else return message.channel.send(noraceEmbed);
 		}
 

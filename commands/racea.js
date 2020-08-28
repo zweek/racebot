@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-let { racers, racer } = require ('./race.js')
 
 const adminhelpEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
@@ -28,7 +27,7 @@ const disallowEmbed = new Discord.MessageEmbed()
 module.exports = {
 	name: 'racea',
 	execute(message, args) {
-		//if (!message.member.roles.cache.some((role) => role.name === 'raceadmin')) return message.channel.send(disallowEmbed)
+		if (!message.member.roles.cache.some((role) => role.name === 'raceadmin')) return //message.channel.send(disallowEmbed)
 
 		if (args[0] === 'help') {
 			return message.channel.send(adminhelpEmbed);
@@ -36,10 +35,5 @@ module.exports = {
 		if (args[0] === 'h') {
 			return message.channel.send(adminhEmbed);
 		}
-
-		if (args[0] === 'clear' || args[0] === 'c') {
-			racers = [];
-		}
-		
 	},
 };
