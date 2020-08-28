@@ -30,6 +30,23 @@ const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You are not allowed to do that');
 
+String.prototype.toHHMMSS = function () {
+	let sec_num = parseInt(this, 10); // don't forget the second param
+	let hours   = Math.floor(sec_num / 3600);
+	let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	let seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+	if (hours   < 10) {hours   = "0"+hours;}
+	if (minutes < 10) {minutes = "0"+minutes;}
+	if (seconds < 10) {seconds = "0"+seconds;}
+	if (hours === '00') {
+		return minutes + ':' + seconds;
+	} else {
+		return hours + ':' + minutes + ':' + seconds;
+	}
+	
+}
+
 //converts the HH:MM:SS format into total number of seconds
 function convertToSeconds(hours, minutes, seconds) {
 	let h = hours * 3600;
@@ -41,6 +58,21 @@ function convertToSeconds(hours, minutes, seconds) {
 
 function prettyFormat(number) {
  	return (number.length === 1) ? `0${number}` : number.toString();
+}
+
+function ordinalSuffixOf(i) {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
 }
 
 let racers = [];
@@ -73,10 +105,13 @@ module.exports = {
 					time: convertToSeconds(time[0], time[1], time[2])
 				}
 
-				racer.racer.time = racer.time;
-
 				if (racers.some(r => r.racer.id === message.author.id)) {
-
+					for (let r of racers) {
+						if (r.racer.id === message.author.id) {
+							r.time = racer.time;
+							break;
+						}
+					}
 					const editEmbedHMS = new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription(`<@${message.author.id}> You edited your time: ${time[0]}h ${prettyFormat(time[1])}m ${prettyFormat(time[2])}s`);
@@ -106,11 +141,14 @@ module.exports = {
 					time: convertToSeconds(0, time[0], time[1])
 				}
 
-				//probably not the best way to do this, but it works
-				racer.racer.time = racer.time;
 
 				if (racers.some(r => r.racer.id === message.author.id)) {
-
+					for (let r of racers) {
+						if (r.racer.id === message.author.id) {
+							r.time = racer.time;
+							break;
+						}
+					}
 					const editEmbedMS = new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription(`<@${message.author.id}> You edited your time: ${time[0]}m ${prettyFormat(time[1])}s`);
@@ -132,6 +170,41 @@ module.exports = {
 
 		if (args[0] === 'results' || args[0] === 'r') {
 			if (raceActive === true) {
+				racers.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)); 
+				let m = "";
+				let number = "";
+				let racetime = "";
+
+				for (let i in racers) {
+					switch (i) {
+						case '0':
+							number = '🥇'
+							console.log(1);
+							break;
+						case '1':
+							number = '🥈'
+							console.log(2);
+							break;
+						case '2':
+							number = '🥉'
+							console.log(3);
+							break;
+
+						default:
+							number = ordinalSuffixOf(parseInt(i)+1);
+							console.log('ye no');
+						
+					}
+					
+					m = m + `${number} <@${racers[i].racer.id}> - ${racers[i].time.toString().toHHMMSS()}\n`
+				}
+
+				message.channel.send(
+					new Discord.MessageEmbed()
+						.setColor('#3fffd9')
+						.setDescription(m));
+				
+				
 
 			} else return message.channel.send(noraceEmbed);
 		}
