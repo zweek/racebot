@@ -133,9 +133,6 @@ module.exports = {
 		if (args[0] === 'results' || args[0] === 'r') {
 			if (raceActive === true) {
 
-				racers.sort(a, b) => a - b)
-				
-
 			} else return message.channel.send(noraceEmbed);
 		}
 
