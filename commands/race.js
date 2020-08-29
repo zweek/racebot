@@ -106,7 +106,7 @@ module.exports = {
 			//let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
 			
 			if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[1])) {
-				if (/^\d+:0?6:0?9$/.test(args[1])) {
+				if (/^\d+:0?6:0?9$/.test(args[1]) || /^\d+:[0-5]?4:20$/.test(args[1])) {
 					message.channel.send('nice');
 				}
 
@@ -147,7 +147,7 @@ module.exports = {
 			
 
 			} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[1])) {
-				if (/^0?6:0?9$/.test(args[1])) {
+				if (/^0?6:0?9$/.test(args[1]) || /^0?4:20$/.test(args[1])) {
 					message.channel.send('nice');
 				}
 				
