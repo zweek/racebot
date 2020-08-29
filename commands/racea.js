@@ -44,6 +44,10 @@ module.exports = {
 
 		}
 
+		if (args [0] === 'remove' || args[0] === 'r') {
+			
+		}
+
 		if (args[0] === 'ban' || args[0] === 'b') {
 			
 		}

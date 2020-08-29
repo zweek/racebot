@@ -87,6 +87,13 @@ module.exports = {
 	name: 'race',
 	execute(message, args) {
 
+		if (args[0] === 'hello' && message.author.id === '104256450607464448') {
+			const helloEmbed = new Discord.MessageEmbed()
+				.setColor('#3fffd9')
+				.setDescription('hello my name is racebot and i am working again now hopefully,\nshoutouts to zweeks friend sye who wrote like half of my code lol');
+			message.channel.send(helloEmbed);
+		}
+
 		if (args[0] === 'help') {
 			return message.channel.send(helpEmbed);
 		}
@@ -99,6 +106,9 @@ module.exports = {
 			//let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
 			
 			if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[1])) {
+				if (/^\d+:0?6:0?9$/.test(args[1])) {
+					message.channel.send('nice');
+				}
 
 				raceActive = true;
 
@@ -136,7 +146,10 @@ module.exports = {
 			return message.channel.send(submitEmbedHMS);
 			
 
-			} else if(/^[0-5]?\d:[0-5]?\d$/.test(args[1])) {
+			} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[1])) {
+				if (/^0?6:0?9$/.test(args[1])) {
+					message.channel.send('nice');
+				}
 				
 				raceActive = true;
 				
