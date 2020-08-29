@@ -7,6 +7,7 @@ const helpEmbed = new Discord.MessageEmbed()
 		{ name: '!race submit <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
 		{ name: '!race results', value:'View the results for the current race' },
 		{ name: '!race end', value:'End the current race and reset the leaderboard' },
+		{ name: '!race info', value:'Show info about Racebot' },
 	);
 
 const hEmbed = new Discord.MessageEmbed()
@@ -16,6 +17,7 @@ const hEmbed = new Discord.MessageEmbed()
 		{ name: '!race s <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
 		{ name: '!race r', value:'View the results for the current race' },
 		{ name: '!race e', value:'End the current race and reset the leaderboard' },
+		{ name: '!race i', value:'Show info about Racebot' },
 	);
 
 const endEmbed = new Discord.MessageEmbed()
@@ -240,6 +242,18 @@ module.exports = {
 					return message.channel.send(endEmbed);
 				} else return message.channel.send(noraceEmbed);
 			} else return message.channel.send(disallowEmbed);
+		}
+
+		if (args[0] === 'info' || args[0] === 'i') {
+			const infoEmbed = new Discord.MessageEmbed()
+				.setColor('#3fffd9')
+				.setTitle('Racebot info')
+				.addFields(
+					{ name: 'written by', value:'**zweek**#1296 and **Sye**#0808' },
+					{ name: 'GitHub page', value:'https://github.com/zweek/racebot' },
+				);
+
+			message.channel.send(infoEmbed);
 		}
 	},
 };
