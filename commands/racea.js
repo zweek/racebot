@@ -24,16 +24,28 @@ const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You are not allowed to do that');
 
+let bannedRacers = [];
+
 module.exports = {
 	name: 'racea',
 	execute(message, args) {
-		if (!message.member.roles.cache.some((role) => role.name === 'raceadmin')) return //message.channel.send(disallowEmbed)
+		if (!message.member.roles.cache.some((role) => role.name === 'racemod') && !message.member.roles.cache.some((role) => role.name === 'Speedrun.com Mod')) return
+
+		
 
 		if (args[0] === 'help') {
 			return message.channel.send(adminhelpEmbed);
 		}
 		if (args[0] === 'h') {
 			return message.channel.send(adminhEmbed);
+		}
+
+		if (args[0] === 'clear' || args[0] === 'c') {
+
+		}
+
+		if (args[0] === 'ban' || args[0] === 'b') {
+			
 		}
 	},
 };

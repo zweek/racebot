@@ -30,16 +30,17 @@ const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You are not allowed to do that');
 
+//time format for leaderboard display
 String.prototype.toHHMMSS = function () {
-	let sec_num = parseInt(this, 10); // don't forget the second param
+	let sec_num = parseInt(this, 10);
 	let hours   = Math.floor(sec_num / 3600);
 	let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
 	let seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-	if (hours   < 10) {hours   = "0"+hours;}
+	//if (hours   < 10) {hours   = "0"+hours;}
 	if (minutes < 10) {minutes = "0"+minutes;}
 	if (seconds < 10) {seconds = "0"+seconds;}
-	if (hours === '00') {
+	if (hours === 0) {
 		return minutes + ':' + seconds;
 	} else {
 		return hours + ':' + minutes + ':' + seconds;
@@ -56,12 +57,14 @@ function convertToSeconds(hours, minutes, seconds) {
 	return parseInt(h) + parseInt(m) + parseInt(s);
 }
 
+//places a 0 before minutes or seconds if the submission is only 1 digit
 function prettyFormat(number) {
  	return (number.length === 1) ? `0${number}` : number.toString();
 }
 
+//adds proper suffixes for the leaderboard placements, and ignores 11, 12, 13
 function ordinalSuffixOf(i) {
-    var j = i % 10,
+    let j = i % 10,
         k = i % 100;
     if (j == 1 && k != 11) {
         return i + "st";
@@ -80,7 +83,6 @@ let racer = {};
 
 let raceActive = false;
 
-
 module.exports = {
 	name: 'race',
 	execute(message, args) {
@@ -93,6 +95,9 @@ module.exports = {
 		}
 
 		if (args[0] === 'submit' || args[0] === 's') {
+			
+			//let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
+			
 			if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[1])) {
 
 				raceActive = true;
@@ -125,6 +130,8 @@ module.exports = {
 				.setDescription(`<@${message.author.id}> You submitted: ${time[0]}h ${prettyFormat(time[1])}m ${prettyFormat(time[2])}s`);
 
 				console.log(racers);
+
+			//message.member.roles.add(racerRole)
 			
 			return message.channel.send(submitEmbedHMS);
 			
@@ -162,6 +169,9 @@ module.exports = {
 				.setDescription(`<@${message.author.id}> You submitted: ${time[0]}m ${prettyFormat(time[1])}s`);
 
 				console.log(racers);
+
+
+			//message.member.roles.add(racerRole)
 				
 			return message.channel.send(submitEmbedMS);
 
@@ -192,7 +202,6 @@ module.exports = {
 
 						default:
 							number = ordinalSuffixOf(parseInt(i)+1);
-							console.log('ye no');
 						
 					}
 					
