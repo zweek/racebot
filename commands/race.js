@@ -89,13 +89,6 @@ module.exports = {
 	name: 'race',
 	execute(message, args) {
 
-		if (args[0] === 'hello' && message.author.id === '104256450607464448') {
-			const helloEmbed = new Discord.MessageEmbed()
-				.setColor('#3fffd9')
-				.setDescription('hello my name is racebot and i am working again now hopefully,\nshoutouts to zweeks friend sye who wrote like half of my code lol');
-			message.channel.send(helloEmbed);
-		}
-
 		if (args[0] === 'help') {
 			return message.channel.send(helpEmbed);
 		}
@@ -228,13 +221,15 @@ module.exports = {
 						.setColor('#3fffd9')
 						.setDescription(m));
 				
-				
-
 			} else return message.channel.send(noraceEmbed);
 		}
 
 		if (args[0] === 'end' || args[0] === 'e') {
-			if (racers.some(r => r.racer.id === message.author.id)) {
+			if (
+			racers.some(r => r.racer.id === message.author.id) ||
+			message.member.roles.cache.some((role) => role.name === 'racemod') ||
+			message.member.roles.cache.some((role) => role.name === 'Speedrun.com Mod')
+			) {
 				if (raceActive === true) {
 					racers = [];
 					raceActive = false;
@@ -252,7 +247,6 @@ module.exports = {
 					{ name: 'written by', value:'**zweek**#1296 and **Sye**#0808' },
 					{ name: 'GitHub page', value:'https://github.com/zweek/racebot' },
 				);
-
 			message.channel.send(infoEmbed);
 		}
 	},
