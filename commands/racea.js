@@ -28,6 +28,14 @@ const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You are not allowed to do that');
 
+const noUserEmbed = new Discord.MessageEmbed()
+	.setColor('#3fffd9')
+	.setDescription('You must specify a user');
+
+const noTimeEmbed = new Discord.MessageEmbed()
+	.setColor('#3fffd9')
+	.setDescription('You must specify a time');
+
 let bannedRacers = [];
 
 module.exports = {
@@ -54,32 +62,46 @@ module.exports = {
 			if (args[1] === 'user') {
 				if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[2])) {
 
-					message.channel.send(
+					return message.channel.send(
 						new Discord.MessageEmbed()
 						.setColor('#3fffd9')
-						.setDescription("Added [USER] to current race with [TIME]")
+						.setDescription("Added [USER] to current race with [hmsTIME]")
 					);
-				}
-			}
+				} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[2])) {
+
+					return message.channel.send(
+						new Discord.MessageEmbed()
+						.setColor('#3fffd9')
+						.setDescription("Added [USER] to current race with [msTIME]")
+					);
+				} else return message.channel.send(noTimeEmbed);
+			} else return message.channel.send(noUserEmbed);
 		}
 
 		if (args [0] === 'edit' || args[0] === 'e') {
 			if (args[1] === 'user') {
 				if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[2])) {
 
-					message.channel.send(
+					return message.channel.send(
 						new Discord.MessageEmbed()
 						.setColor('#3fffd9')
-						.setDescription("Edited [USER]'s time to [TIME]")
+						.setDescription("Edited [USER]'s time to [hmsTIME]")
 					);
-				}
-			}
+				} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[2])) {
+
+					return message.channel.send(
+						new Discord.MessageEmbed()
+						.setColor('#3fffd9')
+						.setDescription("Edited [USER]'s time to [msTIME]")
+					);
+				} else return message.channel.send(noTimeEmbed);
+			} else return message.channel.send(noUserEmbed);
 		}
 
 		if (args[0] === 'clear' || args[0] === 'c') {
 			racers = [];
 			raceActive = false;
-			message.channel.send(
+			return message.channel.send(
 				new Discord.MessageEmbed()
 				.setColor('#3fffd9')
 				.setDescription('Race leaderboard cleared and reset')
@@ -89,18 +111,20 @@ module.exports = {
 		if (args [0] === 'remove' || args[0] === 'r') {
 			if (args[1] === 'user') {
 
-				message.channel.send(
+				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription('Removed [USER] from the current race')
 				);
-			}			
+			} else return message.channel.send(noUserEmbed);			
 		}
 
 		if (args[0] === 'ban' || args[0] === 'b') {
 			if (args[1] === 'user') {
 
-				message.channel.send(
+				bannedRacers.push();
+
+				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription('Banned [USER] from participating in future races')
@@ -111,12 +135,12 @@ module.exports = {
 		if (args[0] === 'pardon' || args[0] === 'p') {
 			if (args[1] === 'user') {
 				
-				message.channel.send(
+				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription('Unbanned [USER] from participating in races')
 				);
-			}
+			} else return message.channel.send(noUserEmbed);
 		}
 	},
 };
