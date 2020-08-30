@@ -97,8 +97,11 @@ module.exports = {
 		}
 
 		if (args[0] === 'submit' || args[0] === 's') {
-			
-			//let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
+
+			if (!message.member.roles.cache.some((role) => role.name === 'racer')) {
+				let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
+				message.member.roles.add(racerRole)
+			}
 			
 			if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[1])) {
 				if (/^\d+:0?6:0?9$/.test(args[1]) || /^\d+:[0-5]?4:20$/.test(args[1])) {
@@ -135,8 +138,6 @@ module.exports = {
 				.setDescription(`<@${message.author.id}> You submitted: ${time[0]}h ${prettyFormat(time[1])}m ${prettyFormat(time[2])}s`);
 
 				console.log(racers);
-
-			//message.member.roles.add(racerRole)
 			
 			return message.channel.send(submitEmbedHMS);
 			
@@ -178,9 +179,6 @@ module.exports = {
 
 				console.log(racers);
 
-
-			//message.member.roles.add(racerRole)
-				
 			return message.channel.send(submitEmbedMS);
 
 			} else return message.react('❌');
