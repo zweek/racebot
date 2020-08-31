@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 
+const JSONdb = require('simple-json-db');
+const db = new JSONdb('db/racedb.json');
+
 const helpEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setTitle('Available Commands')
@@ -39,7 +42,6 @@ String.prototype.toHHMMSS = function () {
 	let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
 	let seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-	//if (hours   < 10) {hours   = "0"+hours;}
 	if (minutes < 10) {minutes = "0"+minutes;}
 	if (seconds < 10) {seconds = "0"+seconds;}
 	if (hours === 0) {
@@ -47,7 +49,6 @@ String.prototype.toHHMMSS = function () {
 	} else {
 		return hours + ':' + minutes + ':' + seconds;
 	}
-	
 }
 
 //converts the HH:MM:SS format into total number of seconds
@@ -57,11 +58,6 @@ function convertToSeconds(hours, minutes, seconds) {
 	let s = seconds;
 
 	return parseInt(h) + parseInt(m) + parseInt(s);
-}
-
-//places a 0 before minutes or seconds if the submission is only 1 digit
-function prettyFormat(number) {
- 	return (number.length === 1) ? `0${number}` : number.toString();
 }
 
 //adds proper suffixes for the leaderboard placements, and ignores 11, 12, 13
@@ -81,9 +77,10 @@ function ordinalSuffixOf(i) {
 }
 
 let racers = [];
-let racer = {};
 
-let raceActive = false;
+db.set('racers', []);
+
+db.set('raceActive', false);
 
 module.exports = {
 	name: 'race',
@@ -98,90 +95,64 @@ module.exports = {
 
 		if (args[0] === 'submit' || args[0] === 's') {
 
+			let timeFormat = '';
+
 			if (!message.member.roles.cache.some((role) => role.name === 'racer')) {
 				let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
 				message.member.roles.add(racerRole)
 			}
 			
-			if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[1])) {
-				if (/^\d+:0?6:0?9$/.test(args[1]) || /^\d+:[0-5]?4:20$/.test(args[1])) {
+			if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[1])) {
+				timeFormat = 'hms'
+				
+				if (/^(\d+)?:?0?6:0?9$/.test(args[1]) || /^(\d+)?:?[0-5]?4:20$/.test(args[1])) {
 					message.channel.send('nice');
 				}
-
-				raceActive = true;
-
-			// hours:minutes:seconds
+				
 				time = args[1].split(':');
-
-				racer = {
+				
+				let racer = {
 					racer: message.author,
-					time: convertToSeconds(time[0], time[1], time[2])
+					time: (time.length === 2) ? convertToSeconds(0, time[0], time[1]) : convertToSeconds(time[0], time[1], time[2])
 				}
 
-				if (racers.some(r => r.racer.id === message.author.id)) {
-					for (let r of racers) {
-						if (r.racer.id === message.author.id) {
-							r.time = racer.time;
-							break;
-						}
+			
+			db.set('raceActive', true);
+
+			racers = db.get('racers');
+				
+
+			if (racers.some(r => r.racer.id === message.author.id)) {
+				for (let r of racers) {
+					if (r.racer.id === message.author.id) {
+						r.time = racer.time;
+						break;
 					}
-					const editEmbedHMS = new Discord.MessageEmbed()
-					.setColor('#3fffd9')
-					.setDescription(`<@${message.author.id}> You edited your time: ${time[0]}h ${prettyFormat(time[1])}m ${prettyFormat(time[2])}s`);
+				}
 
-					console.log(racers);
-					return message.channel.send(editEmbedHMS);
-				} else racers.push(racer);
-
-				const submitEmbedHMS = new Discord.MessageEmbed()
+				const editEmbedHMS = new Discord.MessageEmbed()
 				.setColor('#3fffd9')
-				.setDescription(`<@${message.author.id}> You submitted: ${time[0]}h ${prettyFormat(time[1])}m ${prettyFormat(time[2])}s`);
+				.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
 
 				console.log(racers);
+				return message.channel.send(editEmbedHMS);
+			} else {
+				racers.push(racer);
+				db.set('racers', racers);
+			} 
+
+			const submitEmbedHMS = new Discord.MessageEmbed()
+			.setColor('#3fffd9')
+			.setDescription(`<@${message.author.id}> You submitted: ${racer.time.toString().toHHMMSS()}`);
+
+			console.log(racers)
+
 			
 			return message.channel.send(submitEmbedHMS);
 			
-
-			} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[1])) {
-				if (/^0?6:0?9$/.test(args[1]) || /^0?4:20$/.test(args[1])) {
-					message.channel.send('nice');
-				}
-				
-				raceActive = true;
-				
-			// minutes:seconds
-				time = args[1].split(':');
-
-				racer = {
-					racer: message.author,
-					time: convertToSeconds(0, time[0], time[1])
-				}
-
-
-				if (racers.some(r => r.racer.id === message.author.id)) {
-					for (let r of racers) {
-						if (r.racer.id === message.author.id) {
-							r.time = racer.time;
-							break;
-						}
-					}
-					const editEmbedMS = new Discord.MessageEmbed()
-					.setColor('#3fffd9')
-					.setDescription(`<@${message.author.id}> You edited your time: ${time[0]}m ${prettyFormat(time[1])}s`);
-
-					console.log(racers);
-					return message.channel.send(editEmbedMS);
-				} else racers.push(racer);
-
-				const submitEmbedMS = new Discord.MessageEmbed()
-				.setColor('#3fffd9')
-				.setDescription(`<@${message.author.id}> You submitted: ${time[0]}m ${prettyFormat(time[1])}s`);
-
-				console.log(racers);
-
-			return message.channel.send(submitEmbedMS);
-
-			} else return message.react('❌');
+			} else {
+				return message.react('❌');
+			}
 		}
 
 		if (args[0] === 'results' || args[0] === 'r') {

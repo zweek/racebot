@@ -2,3 +2,4 @@ config.json
 feature_ideas.txt
 node_modules
 racebot.code-workspace
+db/
