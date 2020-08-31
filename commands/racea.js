@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 
+const JSONdb = require('simple-json-db');
+const db = new JSONdb('db/racedb.json');
+
 const adminhelpEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setTitle('Available Admin Commands')
@@ -41,10 +44,7 @@ let bannedRacers = [];
 module.exports = {
 	name: 'racea',
 	execute(message, args) {
-		
-		//this creates an error: Cannot use import statement outside a module, dont know how to fix :(
-		//import { racers } from './race'
-		
+				
 		if (
 		!message.member.roles.cache.some((role) => role.name === 'racemod') &&
 		!message.member.roles.cache.some((role) => role.name === 'Speedrun.com Mod')
