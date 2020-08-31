@@ -23,26 +23,22 @@ const hEmbed = new Discord.MessageEmbed()
 		{ name: '!race i', value:'Show info about Racebot' },
 	);
 
-const endEmbed = new Discord.MessageEmbed()
-	.setColor('#3fffd9')
-	.setDescription('Race ended and leaderboard reset');
-
 const noraceEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
-	.setDescription('No race in progress');
+	.setDescription('No race in progress')
 
 const disallowEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
-	.setDescription('You are not allowed to do that');
+	.setDescription('You are not allowed to do that')
 
-//time format for leaderboard display
+//time format for display
 String.prototype.toHHMMSS = function () {
 	let sec_num = parseInt(this, 10);
 	let hours   = Math.floor(sec_num / 3600);
 	let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
 	let seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-	if (minutes < 10) {minutes = "0"+minutes;}
+	if (minutes < 10 && hours > 0) {minutes = "0"+minutes;}
 	if (seconds < 10) {seconds = "0"+seconds;}
 	if (hours === 0) {
 		return minutes + ':' + seconds;
@@ -77,7 +73,6 @@ function ordinalSuffixOf(i) {
 }
 
 let racers = [];
-
 db.set('racers', []);
 
 db.set('raceActive', false);
@@ -96,17 +91,17 @@ module.exports = {
 		if (args[0] === 'submit' || args[0] === 's') {
 
 			let timeFormat = '';
-
-			if (!message.member.roles.cache.some((role) => role.name === 'racer')) {
-				let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
-				message.member.roles.add(racerRole)
-			}
 			
 			if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[1])) {
 				timeFormat = 'hms'
 				
 				if (/^(\d+)?:?0?6:0?9$/.test(args[1]) || /^(\d+)?:?[0-5]?4:20$/.test(args[1])) {
 					message.channel.send('nice');
+				}
+
+				if (!message.member.roles.cache.some((role) => role.name === 'racer')) {
+					let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
+					message.member.roles.add(racerRole)
 				}
 				
 				time = args[1].split(':');
@@ -156,25 +151,21 @@ module.exports = {
 		}
 
 		if (args[0] === 'results' || args[0] === 'r') {
-			if (raceActive === true) {
+			if (db.storage.raceActive === true) {
 				racers.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)); 
 				let m = "";
 				let number = "";
-				let racetime = "";
 
 				for (let i in racers) {
 					switch (i) {
 						case '0':
 							number = '🥇'
-							console.log(1);
 							break;
 						case '1':
 							number = '🥈'
-							console.log(2);
 							break;
 						case '2':
 							number = '🥉'
-							console.log(3);
 							break;
 
 						default:
@@ -187,6 +178,7 @@ module.exports = {
 
 				message.channel.send(
 					new Discord.MessageEmbed()
+						.setTitle('Race results')
 						.setColor('#3fffd9')
 						.setDescription(m));
 				
@@ -199,11 +191,16 @@ module.exports = {
 			message.member.roles.cache.some((role) => role.name === 'racemod') ||
 			message.member.roles.cache.some((role) => role.name === 'Speedrun.com Mod')
 			) {
-				if (raceActive === true) {
+				if (db.storage.raceActive === true) {
 					racers = [];
-					raceActive = false;
+					db.set('racers', []);
+					db.set('raceActive', false);
 	
-					return message.channel.send(endEmbed);
+					return message.channel.send(
+						new Discord.MessageEmbed()
+						.setColor('#3fffd9')
+						.setDescription('Race ended and leaderboard reset')
+					);
 				} else return message.channel.send(noraceEmbed);
 			} else return message.channel.send(disallowEmbed);
 		}

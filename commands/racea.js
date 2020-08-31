@@ -39,6 +39,10 @@ const noTimeEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('You must specify a time');
 
+const noRaceEmbed = new Discord.MessageEmbed()
+	.setColor('#3fffd9')
+	.setDescription('No race in progress');
+
 let bannedRacers = [];
 
 module.exports = {
@@ -60,19 +64,12 @@ module.exports = {
 
 		if (args [0] === 'add' || args[0] === 'a') {
 			if (args[1] === 'user') {
-				if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[2])) {
+				if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[2])) {
 
 					return message.channel.send(
 						new Discord.MessageEmbed()
 						.setColor('#3fffd9')
 						.setDescription("Added [USER] to current race with [hmsTIME]")
-					);
-				} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[2])) {
-
-					return message.channel.send(
-						new Discord.MessageEmbed()
-						.setColor('#3fffd9')
-						.setDescription("Added [USER] to current race with [msTIME]")
 					);
 				} else return message.channel.send(noTimeEmbed);
 			} else return message.channel.send(noUserEmbed);
@@ -80,32 +77,29 @@ module.exports = {
 
 		if (args [0] === 'edit' || args[0] === 'e') {
 			if (args[1] === 'user') {
-				if (/^\d+:[0-5]?\d:[0-5]?\d$/.test(args[2])) {
+				if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[2])) {
 
 					return message.channel.send(
 						new Discord.MessageEmbed()
 						.setColor('#3fffd9')
 						.setDescription("Edited [USER]'s time to [hmsTIME]")
 					);
-				} else if (/^[0-5]?\d:[0-5]?\d$/.test(args[2])) {
-
-					return message.channel.send(
-						new Discord.MessageEmbed()
-						.setColor('#3fffd9')
-						.setDescription("Edited [USER]'s time to [msTIME]")
-					);
 				} else return message.channel.send(noTimeEmbed);
 			} else return message.channel.send(noUserEmbed);
 		}
 
 		if (args[0] === 'clear' || args[0] === 'c') {
-			racers = [];
-			raceActive = false;
-			return message.channel.send(
-				new Discord.MessageEmbed()
-				.setColor('#3fffd9')
-				.setDescription('Race leaderboard cleared and reset')
-			);
+			if(db.storage.raceActive === true) {
+
+				db.set('racers', []);
+				db.set('raceActive', false);
+
+				return message.channel.send(
+					new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription('Race leaderboard cleared and reset')
+				);
+			} else return message.channel.send(noRaceEmbed);
 		}
 
 		if (args [0] === 'remove' || args[0] === 'r') {
