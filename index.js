@@ -32,7 +32,7 @@ bot.on('message', message => {
 	}
 	catch (error) {
 		console.error(error);
-		message.reply('oops');
+		message.channel.send('oops');
 	}
 });
 

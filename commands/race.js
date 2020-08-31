@@ -4,32 +4,32 @@ const JSONdb = require('simple-json-db');
 const db = new JSONdb('db/racedb.json');
 
 const helpEmbed = new Discord.MessageEmbed()
-	.setColor('#3fffd9')
-	.setTitle('Available Commands')
-	.addFields(
-		{ name: '!race submit <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
-		{ name: '!race results', value:'View the results for the current race' },
-		{ name: '!race end', value:'End the current race and reset the leaderboard' },
-		{ name: '!race info', value:'Show info about Racebot' },
-	);
+.setColor('#3fffd9')
+.setTitle('Available Commands')
+.addFields(
+	{ name: '!race submit <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
+	{ name: '!race results', value:'View the results for the current race' },
+	{ name: '!race end', value:'End the current race and reset the leaderboard' },
+	{ name: '!race info', value:'Show info about Racebot' },
+);
 
 const hEmbed = new Discord.MessageEmbed()
-	.setColor('#3fffd9')
-	.setTitle('Available quick Commands')
-	.addFields(
-		{ name: '!race s <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
-		{ name: '!race r', value:'View the results for the current race' },
-		{ name: '!race e', value:'End the current race and reset the leaderboard' },
-		{ name: '!race i', value:'Show info about Racebot' },
-	);
+.setColor('#3fffd9')
+.setTitle('Available quick Commands')
+.addFields(
+	{ name: '!race s <HH:MM:SS> or <MM:SS>', value:'Submit your race time' },
+	{ name: '!race r', value:'View the results for the current race' },
+	{ name: '!race e', value:'End the current race and reset the leaderboard' },
+	{ name: '!race i', value:'Show info about Racebot' },
+);
 
 const noraceEmbed = new Discord.MessageEmbed()
-	.setColor('#3fffd9')
-	.setDescription('No race in progress')
+.setColor('#3fffd9')
+.setDescription('No race in progress')
 
 const disallowEmbed = new Discord.MessageEmbed()
-	.setColor('#3fffd9')
-	.setDescription('You are not allowed to do that')
+.setColor('#3fffd9')
+.setDescription('You are not allowed to do that')
 
 //time format for display
 String.prototype.toHHMMSS = function () {
@@ -89,11 +89,8 @@ module.exports = {
 		}
 
 		if (args[0] === 'submit' || args[0] === 's') {
-
-			let timeFormat = '';
-			
+		
 			if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[1])) {
-				timeFormat = 'hms'
 				
 				if (/^(\d+)?:?0?6:0?9$/.test(args[1]) || /^(\d+)?:?[0-5]?4:20$/.test(args[1])) {
 					message.channel.send('nice');
@@ -121,6 +118,7 @@ module.exports = {
 				for (let r of racers) {
 					if (r.racer.id === message.author.id) {
 						r.time = racer.time;
+						db.set('racers', racers);
 						break;
 					}
 				}
@@ -148,6 +146,10 @@ module.exports = {
 			} else {
 				return message.react('❌');
 			}
+		}
+
+		if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[0])) {
+			return message.react('❌');
 		}
 
 		if (args[0] === 'results' || args[0] === 'r') {

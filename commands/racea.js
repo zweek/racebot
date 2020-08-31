@@ -43,7 +43,7 @@ const noRaceEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('No race in progress');
 
-let bannedRacers = [];
+let racers = db.get('racers');
 
 module.exports = {
 	name: 'racea',
@@ -52,7 +52,7 @@ module.exports = {
 		if (
 		!message.member.roles.cache.some((role) => role.name === 'racemod') &&
 		!message.member.roles.cache.some((role) => role.name === 'Speedrun.com Mod')
-		) return
+		) return message.channel.send(disallowEmbed);
 
 
 		if (args[0] === 'help') {
@@ -103,27 +103,35 @@ module.exports = {
 		}
 
 		if (args [0] === 'remove' || args[0] === 'r') {
-			if (args[1] === 'user') {
+			if(!message.mentions.users.size) {
+				return message.channel.send(noUserEmbed);			
+			}
+			
+			//dunno bout this, it clears all racers instead of just one
+			const taggedUser = message.mentions.users.first();
+
+				db.get('racer')
+				racers.filter(r => r.racer.id != taggedUser.id);
+				db.set('racers', racers);
 
 				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
-					.setDescription('Removed [USER] from the current race')
+					.setDescription(`Removed ${taggedUser.username} from the current race`)
 				);
-			} else return message.channel.send(noUserEmbed);			
 		}
 
 		if (args[0] === 'ban' || args[0] === 'b') {
-			if (args[1] === 'user') {
-
-				bannedRacers.push();
+			if(!message.mentions.users.size) {
+				return message.channel.send(noUserEmbed);			
+			}
 
 				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
 					.setDescription('Banned [USER] from participating in future races')
 				);
-			}		
+					
 		}
 
 		if (args[0] === 'pardon' || args[0] === 'p') {
