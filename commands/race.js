@@ -1,7 +1,10 @@
 const Discord = require('discord.js');
 
+//databases
 const JSONdb = require('simple-json-db');
 const db = new JSONdb('db/racedb.json');
+const adb = new JSONdb('db/admindb.json', {asyncWrite: true});
+const sdb = new JSONdb('db/statsdb.json');
 
 const helpEmbed = new Discord.MessageEmbed()
 .setColor('#3fffd9')
@@ -77,6 +80,8 @@ db.set('racers', []);
 
 db.set('raceActive', false);
 
+let bannedRacers = [];
+
 module.exports = {
 	name: 'race',
 	execute(message, args) {
@@ -89,6 +94,16 @@ module.exports = {
 		}
 
 		if (args[0] === 'submit' || args[0] === 's') {
+
+			bannedRacers = adb.get('bannedRacers');
+
+			if (bannedRacers.some(r => r.user.id === message.author.id)) {
+				return message.channel.send(
+					new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription(`You are currently banned from participating in races`)
+				)
+			}
 		
 			if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[1])) {
 				
@@ -109,38 +124,38 @@ module.exports = {
 				}
 
 			
-			db.set('raceActive', true);
+				db.set('raceActive', true);
 
-			racers = db.get('racers');
+				racers = db.get('racers');
 				
 
-			if (racers.some(r => r.racer.id === message.author.id)) {
-				for (let r of racers) {
-					if (r.racer.id === message.author.id) {
-						r.time = racer.time;
-						db.set('racers', racers);
-						break;
+				if (racers.some(r => r.racer.id === message.author.id)) {
+					for (let r of racers) {
+						if (r.racer.id === message.author.id) {
+							r.time = racer.time;
+							db.set('racers', racers);
+							break;
+						}
 					}
-				}
 
-				const editEmbedHMS = new Discord.MessageEmbed()
+					const editEmbedHMS = new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
+
+					return message.channel.send(editEmbedHMS);
+				} else {
+					racers.push(racer);
+					db.set('racers', racers);
+				} 
+
+				const submitEmbedHMS = new Discord.MessageEmbed()
 				.setColor('#3fffd9')
-				.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
+				.setDescription(`<@${message.author.id}> You submitted: ${racer.time.toString().toHHMMSS()}`);
 
-				return message.channel.send(editEmbedHMS);
-			} else {
-				racers.push(racer);
-				db.set('racers', racers);
-			} 
+				console.log(racers)
 
-			const submitEmbedHMS = new Discord.MessageEmbed()
-			.setColor('#3fffd9')
-			.setDescription(`<@${message.author.id}> You submitted: ${racer.time.toString().toHHMMSS()}`);
-
-			console.log(racers)
-
-			
-			return message.channel.send(submitEmbedHMS);
+				
+				return message.channel.send(submitEmbedHMS);
 			
 			} else {
 				return message.react('❌');

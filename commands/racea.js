@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 
+//databases
 const JSONdb = require('simple-json-db');
 const db = new JSONdb('db/racedb.json');
 const adb = new JSONdb('db/admindb.json');
@@ -44,7 +45,7 @@ const noRaceEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
 	.setDescription('No race in progress');
 
-let racers = db.get('racers');
+let racers = [];
 let bannedRacers = adb.get('bannedRacers');
 
 module.exports = {
@@ -109,19 +110,30 @@ module.exports = {
 				return message.channel.send(noUserEmbed);			
 			}
 			
-			//dunno bout this, it clears all racers instead of just one
-			//ALSO when i submit again it readds EVERYONE WHAT THE FUCK
-			const taggedUser = message.mentions.users.first();
+			//i dont know :( i used the same code from !racea ban but it doesnt work for some reason, need help on this one
+			const taggedUser = {
+				racer: message.mentions.users.first(),
+			}
 
-				db.get('racer')
-				racers.filter(r => r.racer.id === taggedUser.id);
+			if (racers.some(r => r.racer.id === taggedUser.id)) {
+				racers = db.get('racers');
+
+				racers.splice(taggedUser, 1);
+
 				db.set('racers', racers);
 
 				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
-					.setDescription(`Removed ${taggedUser.username} from the current race`)
-				);
+					.setDescription(`Removed ${taggedUser.racer.username} from the current race`)
+				)
+			} else {
+				return message.channel.send(
+					new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription(`${taggedUser.racer.username} is not in this race`)
+				)
+			}
 		}
 
 		if (args[0] === 'ban' || args[0] === 'b') {
@@ -166,7 +178,6 @@ module.exports = {
 				bannedRacers.splice(taggedUser, 1);
 
 				adb.set('bannedRacers', bannedRacers);
-				console.log(bannedRacers);
 
 				return message.channel.send(
 					new Discord.MessageEmbed()
@@ -180,10 +191,6 @@ module.exports = {
 					.setDescription(`${taggedUser.user.username} is not banned`)
 				)
 			}
-		}
-
-		if (args[0] === 't') {
-			console.log(bannedRacers);
 		}
 	}
 }
