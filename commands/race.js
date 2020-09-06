@@ -1,10 +1,16 @@
 const Discord = require('discord.js');
+const typeorm = require("typeorm");
+const Racer = require("../model/Racer").Racer;
+const Race = require("../model/Race").Race;
 
 //databases
 const JSONdb = require('simple-json-db');
 const db = new JSONdb('db/racedb.json');
 const adb = new JSONdb('db/admindb.json', {asyncWrite: true});
 const sdb = new JSONdb('db/statsdb.json');
+const connection = typeorm.getConnection();
+
+
 
 const helpEmbed = new Discord.MessageEmbed()
 .setColor('#3fffd9')
@@ -84,7 +90,7 @@ let bannedRacers = [];
 
 module.exports = {
 	name: 'race',
-	execute(message, args) {
+	async execute(message, args) {
 
 		if (args[0] === 'help') {
 			return message.channel.send(helpEmbed);
@@ -95,15 +101,20 @@ module.exports = {
 
 		if (args[0] === 'submit' || args[0] === 's') {
 
-			bannedRacers = adb.get('bannedRacers');
+			let savedRacers = await connection.manager.find(Racer);
+    		console.log("All racers from the db: ", savedRacers);
+			
+			
 
-			if (bannedRacers.some(r => r.user.id === message.author.id)) {
-				return message.channel.send(
-					new Discord.MessageEmbed()
-					.setColor('#3fffd9')
-					.setDescription(`You are currently banned from participating in races`)
-				)
-			}
+			// bannedRacers = adb.get('bannedRacers');
+
+			// if (bannedRacers.some(r => r.user.id === message.author.id)) {
+			// 	return message.channel.send(
+			// 		new Discord.MessageEmbed()
+			// 		.setColor('#3fffd9')
+			// 		.setDescription(`You are currently banned from participating in races`)
+			// 	)
+			// }
 		
 			if (/^(\d+)?:?[0-5]?\d:[0-5]?\d$/.test(args[1])) {
 				
@@ -115,38 +126,59 @@ module.exports = {
 					let racerRole = message.guild.roles.cache.find(r => r.name === "racer");
 					message.member.roles.add(racerRole)
 				}
+				let raceRepository = connection.getRepository(Race);
+				let activeRace = await raceRepository.findOne({ active: true });
+
+				let race;
+				if(activeRace === undefined) {
+					race = new Race(0, true, []);
+				} else {
+					race = activeRace;
+				}
 				
+				
+				
+
 				time = args[1].split(':');
 				
-				let racer = {
-					racer: message.author,
-					time: (time.length === 2) ? convertToSeconds(0, time[0], time[1]) : convertToSeconds(time[0], time[1], time[2])
-				}
+				// let racer = {
+				// 	racer: message.author,
+				// 	time: (time.length === 2) ? convertToSeconds(0, time[0], time[1]) : convertToSeconds(time[0], time[1], time[2])
+				// }
 
-			
-				db.set('raceActive', true);
+				let racer = new Racer();
+				racer.name = message.author.username;
+				racer.time = (time.length === 2) ? convertToSeconds(0, time[0], time[1]) : convertToSeconds(time[0], time[1], time[2]);
+				racer.discorduser = message.author;
+				race.racers.push(racer);
 
-				racers = db.get('racers');
+				
+				await raceRepository.save(race);
+
+				
+				// db.set('raceActive', true);
+
+				// racers = db.get('racers');
 				
 
-				if (racers.some(r => r.racer.id === message.author.id)) {
-					for (let r of racers) {
-						if (r.racer.id === message.author.id) {
-							r.time = racer.time;
-							db.set('racers', racers);
-							break;
-						}
-					}
+				// if (racers.some(r => r.racer.id === message.author.id)) {
+				// 	for (let r of racers) {
+				// 		if (r.racer.id === message.author.id) {
+				// 			r.time = racer.time;
+				// 			db.set('racers', racers);
+				// 			break;
+				// 		}
+				// 	}
 
-					const editEmbedHMS = new Discord.MessageEmbed()
-					.setColor('#3fffd9')
-					.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
+				// 	const editEmbedHMS = new Discord.MessageEmbed()
+				// 	.setColor('#3fffd9')
+				// 	.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
 
-					return message.channel.send(editEmbedHMS);
-				} else {
-					racers.push(racer);
-					db.set('racers', racers);
-				} 
+				// 	return message.channel.send(editEmbedHMS);
+				// } else {
+				// 	racers.push(racer);
+				// 	db.set('racers', racers);
+				// } 
 
 				const submitEmbedHMS = new Discord.MessageEmbed()
 				.setColor('#3fffd9')

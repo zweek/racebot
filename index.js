@@ -2,6 +2,24 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
 
+
+const typeorm = require("typeorm");
+
+
+const connection = typeorm.createConnection({
+    type: "sqlite",
+    host: "localhost",
+    database: "./db/db.db",
+    synchronize: true,
+    logging: true,
+    entities: [
+		require("./entity/RacerSchema"),
+		require("./entity/RaceSchema")
+    ]
+})
+
+
+
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
