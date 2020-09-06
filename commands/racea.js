@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 
 const JSONdb = require('simple-json-db');
 const db = new JSONdb('db/racedb.json');
+const adb = new JSONdb('db/admindb.json');
 
 const adminhelpEmbed = new Discord.MessageEmbed()
 	.setColor('#3fffd9')
@@ -12,7 +13,7 @@ const adminhelpEmbed = new Discord.MessageEmbed()
 		{ name: '!racea remove <username>', value:'Remove a user from the current race' },
 		{ name: '!racea clear', value:'Clear all users from the current race' },
 		{ name: '!racea ban <username>', value:'Ban a user from submitting to future races' },
-		{ name: '!racea pardon <username>', value:'Unban a user so they may submit to races again' },
+		{ name: '!racea unban <username>', value:'Unban a user so they may submit to races again' },
 	);
 
 const adminhEmbed = new Discord.MessageEmbed()
@@ -24,7 +25,7 @@ const adminhEmbed = new Discord.MessageEmbed()
 		{ name: '!racea r <username>', value:'Remove a user from the current race' },
 		{ name: '!racea c', value: 'Clear all users from the current race' },
 		{ name: '!racea b <username>', value:'Ban a user from submitting to future races' },
-		{ name: '!racea p <username>', value:'Unban a user so they may submit to races again' },
+		{ name: '!racea u <username>', value:'Unban a user so they may submit to races again' },
 	);
 
 const disallowEmbed = new Discord.MessageEmbed()
@@ -44,6 +45,7 @@ const noRaceEmbed = new Discord.MessageEmbed()
 	.setDescription('No race in progress');
 
 let racers = db.get('racers');
+let bannedRacers = adb.get('bannedRacers');
 
 module.exports = {
 	name: 'racea',
@@ -108,10 +110,11 @@ module.exports = {
 			}
 			
 			//dunno bout this, it clears all racers instead of just one
+			//ALSO when i submit again it readds EVERYONE WHAT THE FUCK
 			const taggedUser = message.mentions.users.first();
 
 				db.get('racer')
-				racers.filter(r => r.racer.id != taggedUser.id);
+				racers.filter(r => r.racer.id === taggedUser.id);
 				db.set('racers', racers);
 
 				return message.channel.send(
@@ -126,23 +129,61 @@ module.exports = {
 				return message.channel.send(noUserEmbed);			
 			}
 
+			const taggedUser = {
+				user: message.mentions.users.first(),
+			}
+
+			if (bannedRacers.some(r => r.user.id === taggedUser.user.id)) {
 				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
-					.setDescription('Banned [USER] from participating in future races')
+					.setDescription(`${taggedUser.user.username} is already banned from participating in future races`)
+				)
+			} else {
+				bannedRacers.push(taggedUser);
+				adb.set('bannedRacers', bannedRacers);
+
+				return message.channel.send(
+					new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription(`Banned ${taggedUser.user.username} from participating in future races`)
 				);
-					
+			}
 		}
 
-		if (args[0] === 'pardon' || args[0] === 'p') {
-			if (args[1] === 'user') {
-				
+		if (args[0] === 'unban' || args[0] === 'u') {
+			if(!message.mentions.users.size) {
+				return message.channel.send(noUserEmbed);			
+			}
+
+			const taggedUser = {
+				user: message.mentions.users.first(),
+			}
+			
+			if (bannedRacers.some(r => r.user.id === taggedUser.user.id)) {
+				bannedRacers = adb.get('bannedRacers');
+
+				bannedRacers.splice(taggedUser, 1);
+
+				adb.set('bannedRacers', bannedRacers);
+				console.log(bannedRacers);
+
 				return message.channel.send(
 					new Discord.MessageEmbed()
 					.setColor('#3fffd9')
-					.setDescription('Unbanned [USER] from participating in races')
-				);
-			} else return message.channel.send(noUserEmbed);
+					.setDescription(`Unbanned ${taggedUser.user.username}. They may participate in races again`)
+				)
+			} else {
+				return message.channel.send(
+					new Discord.MessageEmbed()
+					.setColor('#3fffd9')
+					.setDescription(`${taggedUser.user.username} is not banned`)
+				)
+			}
 		}
-	},
-};
+
+		if (args[0] === 't') {
+			console.log(bannedRacers);
+		}
+	}
+}
