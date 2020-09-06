@@ -127,7 +127,6 @@ module.exports = {
 				.setColor('#3fffd9')
 				.setDescription(`<@${message.author.id}> You edited your time: ${racer.time.toString().toHHMMSS()}`)
 
-				console.log(racers);
 				return message.channel.send(editEmbedHMS);
 			} else {
 				racers.push(racer);
@@ -210,7 +209,9 @@ module.exports = {
 		if (args[0] === 'info' || args[0] === 'i') {
 			const infoEmbed = new Discord.MessageEmbed()
 				.setColor('#3fffd9')
+				.setThumbnail('https://cdn.discordapp.com/avatars/720044162178613350/97a70062b055235c477f732730dc85db.webp')
 				.setTitle('Racebot info')
+				.setDescription('Racebot is a simple bot that you can use\nto quickly set up leaderboards for speedrun races')
 				.addFields(
 					{ name: 'written by', value:'**zweek**#1296 and **Sye**#0808' },
 					{ name: 'GitHub page', value:'https://github.com/zweek/racebot' },
